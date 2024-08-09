@@ -1,4 +1,9 @@
-require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs' }});
+require.config({
+    paths: { 
+        'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs' 
+    }
+});
+
 require(['vs/editor/editor.main'], function() {
     const createProjectButton = document.getElementById('createProjectButton');
     const loadProjectButton = document.getElementById('loadProjectButton');
@@ -24,6 +29,10 @@ require(['vs/editor/editor.main'], function() {
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
+    function showAlert(message) {
+        alert(message);
+    }
+
     function updateProjectsList() {
         fetch('/api/projects')
             .then(response => response.json())
@@ -47,7 +56,7 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message);
+                showAlert(data.message); // Mostra alerta em vez de atualizar o console
                 updateProjectsList();
             });
         }
@@ -62,7 +71,7 @@ require(['vs/editor/editor.main'], function() {
                     if (data.code) {
                         codeEditor.setValue(data.code);
                     } else {
-                        updateConsole(data.message);
+                        showAlert(data.message); // Mostra alerta em vez de atualizar o console
                     }
                 });
         }
@@ -78,7 +87,7 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message);
+                showAlert(data.message); // Mostra alerta em vez de atualizar o console
                 updateProjectsList();
             });
         }
@@ -95,7 +104,7 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message);
+                showAlert(data.message); // Mostra alerta em vez de atualizar o console
             });
         }
     });
