@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Project Manager</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+textarea {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+    </style>
+<body>
+    <h1>Gerenciador de Projetos Arduino</h1>
+    <div>
+        <h2>Criar Novo Projeto</h2>
+        <input type="text" id="projectNameInput" placeholder="Nome do Projeto">
+        <button id="createProjectButton">Criar Projeto</button>
+    </div>
+    <div>
+        <h2>Projetos Disponíveis</h2>
+        <ul id="projectsList"></ul>
+    </div>
+    <div>
+        <h2>Carregar Projeto</h2>
+        <input type="text" id="loadProjectNameInput" placeholder="Nome do Projeto">
+        <button id="loadProjectButton">Carregar</button>
+        <button id="deleteProjectButton">Excluir</button>
+    </div>
+    <div>
+        <h2>Editor de Código</h2>
+        <textarea id="codeEditor" rows="20" cols="50"></textarea>
+        <button id="saveCodeButton">Salvar Código</button>
+        <button id="compileCodeButton">Compilar Código</button>
+        <button id="uploadCodeButton">Enviar Código</button>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
