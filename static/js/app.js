@@ -48,15 +48,19 @@ require(['vs/editor/editor.main'], function() {
 
     createProjectButton.addEventListener('click', function() {
         const projectName = projectNameInput.value.trim();
+        if (projectName == '') {
+            alert('O projecto precisar ter nome, por favor')
+        }
         if (projectName) {
             fetch('/api/create_project', {
-                method: 'POST',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_name: projectName })
             })
             .then(response => response.json())
             .then(data => {
-                showAlert(data.message); // Mostra alerta em vez de atualizar o console
+                updateConsole(data.message)
+                showAlert(data.message);
                 updateProjectsList();
             });
         }
@@ -64,6 +68,9 @@ require(['vs/editor/editor.main'], function() {
 
     loadProjectButton.addEventListener('click', function() {
         const projectName = loadProjectNameInput.value.trim();
+        if (projectName == '') {
+            alert('O projecto precisar ter nome, por favor')
+        }
         if (projectName) {
             fetch(`/api/load_code?project_name=${projectName}`)
                 .then(response => response.json())
@@ -71,7 +78,8 @@ require(['vs/editor/editor.main'], function() {
                     if (data.code) {
                         codeEditor.setValue(data.code);
                     } else {
-                        showAlert(data.message); // Mostra alerta em vez de atualizar o console
+                        updateConsole(data.message)
+                        showAlert(data.message);
                     }
                 });
         }
@@ -79,6 +87,9 @@ require(['vs/editor/editor.main'], function() {
 
     deleteProjectButton.addEventListener('click', function() {
         const projectName = loadProjectNameInput.value.trim();
+        if (projectName == '') {
+            alert('O projecto precisar ter nome, por favor')
+        }
         if (projectName) {
             fetch('/api/delete_project', {
                 method: 'POST',
@@ -87,7 +98,8 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                showAlert(data.message); // Mostra alerta em vez de atualizar o console
+                showAlert(data.message);
+                updateConsole(data.message);
                 updateProjectsList();
             });
         }
@@ -104,8 +116,11 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                showAlert(data.message); // Mostra alerta em vez de atualizar o console
+                updateConsole(data.message);
+                showAlert(data.message);
             });
+        }else{
+            alert('Nenhum projecto selecionado')
         }
     });
 
@@ -121,12 +136,16 @@ require(['vs/editor/editor.main'], function() {
             .then(data => {
                 updateConsole(data.message);
                 if (data.output) {
+                    alert('Código compilado com sucesso')
                     updateConsole(data.output);
                 }
                 if (data.error) {
+                    alert('Salve o código antes de compilar, se o erro persistir, verifique o console')
                     updateConsole(data.error);
                 }
             });
+        }else{
+            alert('Nenhum projecto selecionado')
         }
     });
 
@@ -142,12 +161,16 @@ require(['vs/editor/editor.main'], function() {
             .then(data => {
                 updateConsole(data.message);
                 if (data.output) {
+                    alert('Código enviado para placa com sucesso')
                     updateConsole(data.output);
                 }
                 if (data.error) {
+                    alert('Compile o código antes de enviar, se o erro persistir, verifique o console')
                     updateConsole(data.error);
                 }
             });
+        }else{
+            alert('Nenhum projecto selecionado')
         }
     });
 

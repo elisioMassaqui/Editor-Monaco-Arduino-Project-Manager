@@ -47,7 +47,7 @@ def list_projects():
     projects = [d for d in os.listdir(PROJECTS_DIR) if os.path.isdir(os.path.join(PROJECTS_DIR, d))]
     return jsonify(projects)
 
-@app.route('/api/create_project', methods=['POST'])
+@app.route('/api/create_project', methods=['PUT'])
 def create_project():
     data = request.json
     project_name = data.get('project_name')
