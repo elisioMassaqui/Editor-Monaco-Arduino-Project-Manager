@@ -5,23 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arduino Project Manager</title>
     <link rel="stylesheet" href="/static/css/styles.css">
-</head>
     <style>
-        body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
-
-h1 {
-    text-align: center;
-}
-
-textarea {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
+        #console {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        #codeEditor {
+            height: 400px;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs/loader.js"></script>
+</head>
 <body>
     <h1>Gerenciador de Projetos Arduino</h1>
     <div>
@@ -41,11 +40,12 @@ textarea {
     </div>
     <div>
         <h2>Editor de Código</h2>
-        <textarea id="codeEditor" rows="20" cols="50"></textarea>
+        <div id="codeEditor"></div>
         <button id="saveCodeButton">Salvar Código</button>
         <button id="compileCodeButton">Compilar Código</button>
         <button id="uploadCodeButton">Enviar Código</button>
     </div>
+    <div id="console"></div>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

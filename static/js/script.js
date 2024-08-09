@@ -1,44 +1,19 @@
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs' }});
 require(['vs/editor/editor.main'], function() {
-    const createProjectButton = document.getElementById('createProjectButton');
-    const loadProjectButton = document.getElementById('loadProjectButton');
-    const deleteProjectButton = document.getElementById('deleteProjectButton');
-    const saveCodeButton = document.getElementById('saveCodeButton');
-    const compileCodeButton = document.getElementById('compileCodeButton');
-    const uploadCodeButton = document.getElementById('uploadCodeButton');
-
-    const projectNameInput = document.getElementById('projectNameInput');
-    const loadProjectNameInput = document.getElementById('loadProjectNameInput');
-    const codeEditorContainer = document.getElementById('codeEditor');
-    const projectsList = document.getElementById('projectsList');
-    const consoleDiv = document.getElementById('console');
-
-    const codeEditor = monaco.editor.create(codeEditorContainer, {
+    const codeEditor = monaco.editor.create(document.getElementById('codeEditor'), {
         value: '',
         language: 'cpp',
         theme: 'vs-dark'
     });
 
     function updateConsole(message) {
+        const consoleDiv = document.getElementById('console');
         consoleDiv.textContent += message + "\n";
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
-    function updateProjectsList() {
-        fetch('/api/projects')
-            .then(response => response.json())
-            .then(data => {
-                projectsList.innerHTML = '';
-                data.forEach(project => {
-                    const li = document.createElement('li');
-                    li.textContent = project;
-                    projectsList.appendChild(li);
-                });
-            });
-    }
-
-    createProjectButton.addEventListener('click', function() {
-        const projectName = projectNameInput.value.trim();
+    document.getElementById('createProjectButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         if (projectName) {
             fetch('/api/create_project', {
                 method: 'POST',
@@ -48,13 +23,12 @@ require(['vs/editor/editor.main'], function() {
             .then(response => response.json())
             .then(data => {
                 updateConsole(data.message);
-                updateProjectsList();
             });
         }
     });
 
-    loadProjectButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
+    document.getElementById('loadProjectButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         if (projectName) {
             fetch(`/api/load_code?project_name=${projectName}`)
                 .then(response => response.json())
@@ -68,8 +42,8 @@ require(['vs/editor/editor.main'], function() {
         }
     });
 
-    deleteProjectButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
+    document.getElementById('deleteProjectButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         if (projectName) {
             fetch('/api/delete_project', {
                 method: 'POST',
@@ -79,13 +53,12 @@ require(['vs/editor/editor.main'], function() {
             .then(response => response.json())
             .then(data => {
                 updateConsole(data.message);
-                updateProjectsList();
             });
         }
     });
 
-    saveCodeButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
+    document.getElementById('saveCodeButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         const code = codeEditor.getValue();
         if (projectName) {
             fetch('/api/save_code', {
@@ -100,8 +73,8 @@ require(['vs/editor/editor.main'], function() {
         }
     });
 
-    compileCodeButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
+    document.getElementById('compileCodeButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         if (projectName) {
             fetch('/api/compile_code', {
                 method: 'POST',
@@ -110,19 +83,13 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message);
-                if (data.output) {
-                    updateConsole(data.output);
-                }
-                if (data.error) {
-                    updateConsole(data.error);
-                }
+                updateConsole(data.message + "\n" + (data.output || data.error));
             });
         }
     });
 
-    uploadCodeButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
+    document.getElementById('uploadCodeButton').addEventListener('click', function() {
+        const projectName = document.getElementById('projectNameInput').value.trim();
         if (projectName) {
             fetch('/api/upload_code', {
                 method: 'POST',
@@ -131,16 +98,8 @@ require(['vs/editor/editor.main'], function() {
             })
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message);
-                if (data.output) {
-                    updateConsole(data.output);
-                }
-                if (data.error) {
-                    updateConsole(data.error);
-                }
+                updateConsole(data.message + "\n" + (data.output || data.error));
             });
         }
     });
-
-    updateProjectsList();
 });
