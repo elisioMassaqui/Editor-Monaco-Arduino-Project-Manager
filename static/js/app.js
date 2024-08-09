@@ -1,9 +1,11 @@
+//Pegar CDN do editor
 require.config({
     paths: { 
         'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs' 
     }
 });
 
+//Pegar todos elementos da tela pra escutar seus eventos
 require(['vs/editor/editor.main'], function() {
     const createProjectButton = document.getElementById('createProjectButton');
     const loadProjectButton = document.getElementById('loadProjectButton');
@@ -18,21 +20,25 @@ require(['vs/editor/editor.main'], function() {
     const projectsList = document.getElementById('projectsList');
     const consoleDiv = document.getElementById('console');
 
+    //Editor de código e configurações iniciais
     const codeEditor = monaco.editor.create(codeEditorContainer, {
         value: '',
         language: 'cpp',
         theme: 'vs-dark'
     });
 
+    //Atualizar as informações do console
     function updateConsole(message) {
         consoleDiv.textContent += message + "\n";
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
+    //Mostrar alerta, positivo ou negativo
     function showAlert(message) {
         alert(message);
     }
 
+    //Atualizar lista de projectos na UI
     function updateProjectsList() {
         fetch('/api/projects')
             .then(response => response.json())
@@ -46,6 +52,8 @@ require(['vs/editor/editor.main'], function() {
             });
     }
 
+    //Gerenciamento de projectos
+    //Criar Projecto
     createProjectButton.addEventListener('click', function() {
         const projectName = projectNameInput.value.trim();
         if (projectName == '') {
@@ -63,9 +71,12 @@ require(['vs/editor/editor.main'], function() {
                 showAlert(data.message);
                 updateProjectsList();
             });
+        }else{
+            alert('Algo deu errado, verifique o nome que estás a tentar inserir', data.error)
         }
     });
 
+    //Carregar projecto
     loadProjectButton.addEventListener('click', function() {
         const projectName = loadProjectNameInput.value.trim();
         if (projectName == '') {
@@ -85,6 +96,7 @@ require(['vs/editor/editor.main'], function() {
         }
     });
 
+    //Deletar projecto
     deleteProjectButton.addEventListener('click', function() {
         const projectName = loadProjectNameInput.value.trim();
         if (projectName == '') {
@@ -105,7 +117,11 @@ require(['vs/editor/editor.main'], function() {
         }
     });
 
-    saveCodeButton.addEventListener('click', function() {
+
+
+    //Gerenciamento de código
+    //Salvar código
+    function saveCode() {
         const projectName = loadProjectNameInput.value.trim();
         const code = codeEditor.getValue();
         if (projectName) {
@@ -117,14 +133,16 @@ require(['vs/editor/editor.main'], function() {
             .then(response => response.json())
             .then(data => {
                 updateConsole(data.message);
-                showAlert(data.message);
+                //showAlert(data.message);
             });
         }else{
             alert('Nenhum projecto selecionado')
         }
-    });
+    }
 
-    compileCodeButton.addEventListener('click', function() {
+
+    //Compilar código
+    function compileCode() {
         const projectName = loadProjectNameInput.value.trim();
         if (projectName) {
             fetch('/api/compile_code', {
@@ -136,7 +154,7 @@ require(['vs/editor/editor.main'], function() {
             .then(data => {
                 updateConsole(data.message);
                 if (data.output) {
-                    alert('Código compilado com sucesso')
+                    //alert('Código compilado com sucesso')
                     updateConsole(data.output);
                 }
                 if (data.error) {
@@ -147,9 +165,11 @@ require(['vs/editor/editor.main'], function() {
         }else{
             alert('Nenhum projecto selecionado')
         }
-    });
+    }
 
-    uploadCodeButton.addEventListener('click', function() {
+
+    //Carregar código para placa
+    function uploadCode() {
         const projectName = loadProjectNameInput.value.trim();
         if (projectName) {
             fetch('/api/upload_code', {
@@ -161,7 +181,7 @@ require(['vs/editor/editor.main'], function() {
             .then(data => {
                 updateConsole(data.message);
                 if (data.output) {
-                    alert('Código enviado para placa com sucesso')
+                    //alert('Código enviado para placa com sucesso')
                     updateConsole(data.output);
                 }
                 if (data.error) {
@@ -172,7 +192,27 @@ require(['vs/editor/editor.main'], function() {
         }else{
             alert('Nenhum projecto selecionado')
         }
-    });
+    }
 
+    //Chamar funções de código
+    //Salvar
+    saveCodeButton.addEventListener('click', function() {saveCode()});
+    //Compilar
+    compileCodeButton.addEventListener('click', function() {compileCode()});
+    //Enviar
+    uploadCodeButton.addEventListener('click', function() {uploadCode()});
+
+    //Chamar os tres aqui automaticamente com apenas um clique
+    function executar() {
+        saveCode()
+        compileCode()
+        uploadCode()
+    }
+    document.getElementById('code').addEventListener('click', function name(params) {
+        executar()
+        console.log('executado')
+    })
+
+    //Atualizar lista de projectos ao iniciar o app
     updateProjectsList();
 });
