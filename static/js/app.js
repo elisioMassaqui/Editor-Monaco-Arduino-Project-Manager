@@ -27,6 +27,10 @@ require(['vs/editor/editor.main'], function() {
         theme: 'vs-dark'
     });
 
+    
+    //Atualizar lista de projectos ao iniciar o app
+    updateProjectsList();
+
     //Atualizar as informações do console
     function updateConsole(message) {
         consoleDiv.textContent += message + "\n";
@@ -194,6 +198,11 @@ require(['vs/editor/editor.main'], function() {
         }
     }
 
+    document.getElementById('code').addEventListener('click', function name(params) {
+        executar()
+        console.log('executado')
+    })
+    
     //Chamar funções de código
     //Salvar
     saveCodeButton.addEventListener('click', function() {saveCode()});
@@ -208,11 +217,5 @@ require(['vs/editor/editor.main'], function() {
         compileCode()
         uploadCode()
     }
-    document.getElementById('code').addEventListener('click', function name(params) {
-        executar()
-        console.log('executado')
-    })
 
-    //Atualizar lista de projectos ao iniciar o app
-    updateProjectsList();
 });
