@@ -1,48 +1,47 @@
-//Pegar CDN do editor
+// Configuração do CDN do editor
 require.config({
     paths: { 
         'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs' 
     }
 });
 
-//Pegar todos elementos da tela pra escutar seus eventos
+// Inicializa o editor de código e configurações
 require(['vs/editor/editor.main'], function() {
+    // Pegar todos os elementos da tela
     const createProjectButton = document.getElementById('createProjectButton');
     const loadProjectButton = document.getElementById('loadProjectButton');
     const deleteProjectButton = document.getElementById('deleteProjectButton');
     const saveCodeButton = document.getElementById('saveCodeButton');
     const compileCodeButton = document.getElementById('compileCodeButton');
     const uploadCodeButton = document.getElementById('uploadCodeButton');
-
     const projectNameInput = document.getElementById('projectNameInput');
     const loadProjectNameInput = document.getElementById('loadProjectNameInput');
     const codeEditorContainer = document.getElementById('codeEditor');
     const projectsList = document.getElementById('projectsList');
     const consoleDiv = document.getElementById('console');
 
-    //Editor de código e configurações iniciais
+    // Configura o editor de código
     const codeEditor = monaco.editor.create(codeEditorContainer, {
         value: '',
         language: 'cpp',
         theme: 'vs-dark'
     });
 
-    
-    //Atualizar lista de projectos ao iniciar o app
+    // Atualiza a lista de projetos ao iniciar o app
     updateProjectsList();
 
-    //Atualizar as informações do console
+    // Atualiza o console
     function updateConsole(message) {
         consoleDiv.textContent += message + "\n";
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
-    //Mostrar alerta, positivo ou negativo
+    // Mostra alerta
     function showAlert(message) {
         alert(message);
     }
 
-    //Atualizar lista de projectos na UI
+    // Atualiza a lista de projetos na UI
     function updateProjectsList() {
         fetch('/api/projects')
             .then(response => response.json())
@@ -56,166 +55,148 @@ require(['vs/editor/editor.main'], function() {
             });
     }
 
-    //Gerenciamento de projectos
-    //Criar Projecto
-    createProjectButton.addEventListener('click', function() {
+    // Função para criar projeto
+    function createProject() {
         const projectName = projectNameInput.value.trim();
-        if (projectName == '') {
-            alert('O projecto precisar ter nome, por favor')
+        if (!projectName) {
+            alert('O projeto precisa ter um nome, por favor');
+            return;
         }
-        if (projectName) {
-            fetch('/api/create_project', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_name: projectName })
-            })
+        fetch('/api/create_project', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_name: projectName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateConsole(data.message);
+            showAlert(data.message);
+            updateProjectsList();
+        });
+    }
+
+    // Função para carregar projeto
+    function loadProject() {
+        const projectName = loadProjectNameInput.value.trim();
+        if (!projectName) {
+            alert('O projeto precisa ter um nome, por favor');
+            return;
+        }
+        fetch(`/api/load_code?project_name=${projectName}`)
             .then(response => response.json())
             .then(data => {
-                updateConsole(data.message)
-                showAlert(data.message);
-                updateProjectsList();
+                if (data.code) {
+                    codeEditor.setValue(data.code);
+                } else {
+                    updateConsole(data.message);
+                    showAlert(data.message);
+                }
             });
-        }else{
-            alert('Algo deu errado, verifique o nome que estás a tentar inserir', data.error)
-        }
-    });
+    }
 
-    //Carregar projecto
-    loadProjectButton.addEventListener('click', function() {
+    // Função para deletar projeto
+    function deleteProject() {
         const projectName = loadProjectNameInput.value.trim();
-        if (projectName == '') {
-            alert('O projecto precisar ter nome, por favor')
+        if (!projectName) {
+            alert('O projeto precisa ter um nome, por favor');
+            return;
         }
-        if (projectName) {
-            fetch(`/api/load_code?project_name=${projectName}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code) {
-                        codeEditor.setValue(data.code);
-                    } else {
-                        updateConsole(data.message)
-                        showAlert(data.message);
-                    }
-                });
-        }
-    });
+        fetch('/api/delete_project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_name: projectName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showAlert(data.message);
+            updateConsole(data.message);
+            updateProjectsList();
+        });
+    }
 
-    //Deletar projecto
-    deleteProjectButton.addEventListener('click', function() {
-        const projectName = loadProjectNameInput.value.trim();
-        if (projectName == '') {
-            alert('O projecto precisar ter nome, por favor')
-        }
-        if (projectName) {
-            fetch('/api/delete_project', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_name: projectName })
-            })
-            .then(response => response.json())
-            .then(data => {
-                showAlert(data.message);
-                updateConsole(data.message);
-                updateProjectsList();
-            });
-        }
-    });
-
-
-
-    //Gerenciamento de código
-    //Salvar código
+    // Função para salvar código
     function saveCode() {
         const projectName = loadProjectNameInput.value.trim();
         const code = codeEditor.getValue();
-        if (projectName) {
-            fetch('/api/save_code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_name: projectName, code: code })
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateConsole(data.message);
-                //showAlert(data.message);
-            });
-        }else{
-            alert('Nenhum projecto selecionado')
+        if (!projectName) {
+            alert('Nenhum projeto selecionado');
+            return;
         }
+        fetch('/api/save_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_name: projectName, code: code })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateConsole(data.message);
+        });
     }
 
-
-    //Compilar código
+    // Função para compilar código
     function compileCode() {
         const projectName = loadProjectNameInput.value.trim();
-        if (projectName) {
-            fetch('/api/compile_code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_name: projectName })
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateConsole(data.message);
-                if (data.output) {
-                    //alert('Código compilado com sucesso')
-                    updateConsole(data.output);
-                }
-                if (data.error) {
-                    alert('Salve o código antes de compilar, se o erro persistir, verifique o console')
-                    updateConsole(data.error);
-                }
-            });
-        }else{
-            alert('Nenhum projecto selecionado')
+        if (!projectName) {
+            alert('Nenhum projeto selecionado');
+            return;
         }
+        fetch('/api/compile_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_name: projectName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateConsole(data.message);
+            if (data.output) {
+                updateConsole(data.output);
+            }
+            if (data.error) {
+                alert('Salve o código antes de compilar. Se o erro persistir, verifique o console');
+                updateConsole(data.error);
+            }
+        });
     }
 
-
-    //Carregar código para placa
+    // Função para carregar código para a placa
     function uploadCode() {
         const projectName = loadProjectNameInput.value.trim();
-        if (projectName) {
-            fetch('/api/upload_code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_name: projectName })
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateConsole(data.message);
-                if (data.output) {
-                    //alert('Código enviado para placa com sucesso')
-                    updateConsole(data.output);
-                }
-                if (data.error) {
-                    alert('Compile o código antes de enviar, se o erro persistir, verifique o console')
-                    updateConsole(data.error);
-                }
-            });
-        }else{
-            alert('Nenhum projecto selecionado')
+        if (!projectName) {
+            alert('Nenhum projeto selecionado');
+            return;
         }
+        fetch('/api/upload_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_name: projectName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateConsole(data.message);
+            if (data.output) {
+                updateConsole(data.output);
+            }
+            if (data.error) {
+                alert('Compile o código antes de enviar. Se o erro persistir, verifique o console');
+                updateConsole(data.error);
+            }
+        });
     }
 
-    document.getElementById('code').addEventListener('click', function name(params) {
-        executar()
-        console.log('executado')
-    })
-    
-    //Chamar funções de código
-    //Salvar
-    saveCodeButton.addEventListener('click', function() {saveCode()});
-    //Compilar
-    compileCodeButton.addEventListener('click', function() {compileCode()});
-    //Enviar
-    uploadCodeButton.addEventListener('click', function() {uploadCode()});
+    // Adiciona eventos aos botões
+    createProjectButton.addEventListener('click', createProject);
+    loadProjectButton.addEventListener('click', loadProject);
+    deleteProjectButton.addEventListener('click', deleteProject);
+    saveCodeButton.addEventListener('click', saveCode);
+    compileCodeButton.addEventListener('click', compileCode);
+    uploadCodeButton.addEventListener('click', uploadCode);
 
-    //Chamar os tres aqui automaticamente com apenas um clique
+    // Executa salvar, compilar e enviar com um clique
     function executar() {
-        saveCode()
-        compileCode()
-        uploadCode()
+        saveCode();
+        compileCode();
+        uploadCode();
     }
 
+    document.getElementById('code').addEventListener('click', executar);
 });
