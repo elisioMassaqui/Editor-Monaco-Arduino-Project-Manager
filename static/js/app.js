@@ -7,7 +7,7 @@ require.config({
 
 // Inicializa o editor de código e configurações
 require(['vs/editor/editor.main'], function() {
-    // Pegar todos os elementos da tela
+    // Pega todos os elementos da tela
     const createProjectButton = document.getElementById('createProjectButton');
     const loadProjectButton = document.getElementById('loadProjectButton');
     const deleteProjectButton = document.getElementById('deleteProjectButton');
@@ -15,9 +15,8 @@ require(['vs/editor/editor.main'], function() {
     const compileCodeButton = document.getElementById('compileCodeButton');
     const uploadCodeButton = document.getElementById('uploadCodeButton');
     const projectNameInput = document.getElementById('projectNameInput');
-    const loadProjectNameInput = document.getElementById('loadProjectNameInput');
+    const loadProjectSelect = document.getElementById('loadProjectSelect');
     const codeEditorContainer = document.getElementById('codeEditor');
-    const projectsList = document.getElementById('projectsList');
     const consoleDiv = document.getElementById('console');
 
     // Configura o editor de código
@@ -26,9 +25,6 @@ require(['vs/editor/editor.main'], function() {
         language: 'cpp',
         theme: 'vs-dark'
     });
-
-    // Atualiza a lista de projetos ao iniciar o app
-    updateProjectsList();
 
     // Atualiza o console
     function updateConsole(message) {
@@ -46,11 +42,12 @@ require(['vs/editor/editor.main'], function() {
         fetch('/api/projects')
             .then(response => response.json())
             .then(data => {
-                projectsList.innerHTML = '';
+                loadProjectSelect.innerHTML = ''; // Limpa a lista atual
                 data.forEach(project => {
-                    const li = document.createElement('li');
-                    li.textContent = project;
-                    projectsList.appendChild(li);
+                    const option = document.createElement('option');
+                    option.value = project;
+                    option.textContent = project;
+                    loadProjectSelect.appendChild(option);
                 });
             });
     }
@@ -77,9 +74,9 @@ require(['vs/editor/editor.main'], function() {
 
     // Função para carregar projeto
     function loadProject() {
-        const projectName = loadProjectNameInput.value.trim();
+        const projectName = loadProjectSelect.value;
         if (!projectName) {
-            alert('O projeto precisa ter um nome, por favor');
+            alert('Selecione um projeto, por favor');
             return;
         }
         fetch(`/api/load_code?project_name=${projectName}`)
@@ -96,9 +93,9 @@ require(['vs/editor/editor.main'], function() {
 
     // Função para deletar projeto
     function deleteProject() {
-        const projectName = loadProjectNameInput.value.trim();
+        const projectName = loadProjectSelect.value;
         if (!projectName) {
-            alert('O projeto precisa ter um nome, por favor');
+            alert('Selecione um projeto, por favor');
             return;
         }
         fetch('/api/delete_project', {
@@ -116,7 +113,7 @@ require(['vs/editor/editor.main'], function() {
 
     // Função para salvar código
     function saveCode() {
-        const projectName = loadProjectNameInput.value.trim();
+        const projectName = loadProjectSelect.value.trim();
         const code = codeEditor.getValue();
         if (!projectName) {
             alert('Nenhum projeto selecionado');
@@ -135,7 +132,7 @@ require(['vs/editor/editor.main'], function() {
 
     // Função para compilar código
     function compileCode() {
-        const projectName = loadProjectNameInput.value.trim();
+        const projectName = loadProjectSelect.value.trim();
         if (!projectName) {
             alert('Nenhum projeto selecionado');
             return;
@@ -160,7 +157,7 @@ require(['vs/editor/editor.main'], function() {
 
     // Função para carregar código para a placa
     function uploadCode() {
-        const projectName = loadProjectNameInput.value.trim();
+        const projectName = loadProjectSelect.value.trim();
         if (!projectName) {
             alert('Nenhum projeto selecionado');
             return;
@@ -191,6 +188,7 @@ require(['vs/editor/editor.main'], function() {
     compileCodeButton.addEventListener('click', compileCode);
     uploadCodeButton.addEventListener('click', uploadCode);
 
+    
     // Executa salvar, compilar e enviar com um clique
     function executar() {
         saveCode();
@@ -199,4 +197,7 @@ require(['vs/editor/editor.main'], function() {
     }
 
     document.getElementById('code').addEventListener('click', executar);
+
+    // Atualiza a lista de projetos ao iniciar o app
+    updateProjectsList();
 });
