@@ -134,6 +134,39 @@ def detect_arduino_port():
         return None
     except Exception as e:
         return None
+    
+#LIB
+def run_command(command):
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout
+    return result.stderr
+@app.route('/api/available_libraries', methods=['GET'])
+def list_available_libraries():
+    run_command(['arduino-cli', 'lib', 'update-index'])
+    # Isso irá retornar uma lista de bibliotecas disponíveis para pesquisa
+    return jsonify({"message": "Atualize o índice para obter bibliotecas disponíveis"}), 200
+
+@app.route('/api/installed_libraries', methods=['GET'])
+def list_installed_libraries():
+    output = run_command(['arduino-cli', 'lib', 'list'])
+    libraries = [line.split()[0] for line in output.splitlines() if line]
+    return jsonify({"libraries": libraries})
+
+@app.route('/api/install_library', methods=['POST'])
+def install_library():
+    data = request.json
+    library_name = data.get('library_name')
+    output = run_command(['arduino-cli', 'lib', 'install', library_name])
+    return jsonify({"message": output})
+
+@app.route('/api/uninstall_library', methods=['POST'])
+def uninstall_library():
+    data = request.json
+    library_name = data.get('library_name')
+    output = run_command(['arduino-cli', 'lib', 'uninstall', library_name])
+    return jsonify({"message": output})
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

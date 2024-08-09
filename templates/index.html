@@ -27,6 +27,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0-dev-20240628/min/vs/loader.js"></script>
 </head>
 <body>
+    <div>
+    <h2>Bibliotecas Instaladas</h2>
+    <select id="installedLibrariesSelect"></select>
+    <button id="uninstallLibraryButton">Desinstalar Biblioteca</button>
+</div>
+
+<div>
+    <h2>Instalar Biblioteca</h2>
+    <input type="text" id="libraryNameInput" placeholder="Nome da Biblioteca">
+    <button id="installLibraryButton">Instalar</button>
+</div>
+
     <h1>Gerenciador de Projetos Arduino</h1>
     <div>
         <h2>Criar Novo Projeto</h2>
@@ -54,5 +66,6 @@
     </div>
     <div id="console"></div>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/libs.js"></script>
 </body>
 </html>

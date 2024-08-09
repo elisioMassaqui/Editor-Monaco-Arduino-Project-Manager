@@ -200,4 +200,5 @@ require(['vs/editor/editor.main'], function() {
 
     // Atualiza a lista de projetos ao iniciar o app
     updateProjectsList();
+    
 });
